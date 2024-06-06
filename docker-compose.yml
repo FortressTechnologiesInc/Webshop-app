@@ -1,25 +1,20 @@
-version: "3.4"
+ version: '3.8'
+
 services:
+  app:
+    build: .
+    environment:
+      - DATABASE_URL=jdbc:postgresql://db:5432/clojure
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
 
   db:
     image: postgres:12-alpine
-    restart: always
-    expose:
-      - 5432
     environment:
-      - "POSTGRES_PASSWORD=clojure"
-      - "POSTGRES_USER=clojure"
-      - "POSTGRES_DB=clojure"
-
-  clj:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - "DB_HOST=db"
-      - "WEB_HOST=0.0.0.0"
+      POSTGRES_USER: clojure
+      POSTGRES_PASSWORD: clojure
+      POSTGRES_DB: clojure
     ports:
-      - "8080:8080"
-    command: java -jar app.jar
-    depends_on:
-      - db
+      - "5432:5432"
