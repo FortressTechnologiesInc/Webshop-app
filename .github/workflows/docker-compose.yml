@@ -27,6 +27,13 @@ jobs:
         DB_URL: ${{ secrets.DB_URL }}
       run: docker-compose up -d --build
 
+    - name: Wait for MongoDB to be ready
+      run: |
+        echo "Waiting for MongoDB to be ready..."
+        until docker-compose exec mongo mongo --eval "print(\"waited for connection\")"; do
+          sleep 5
+        done
+
     - name: Check Docker Compose services
       run: docker-compose ps
 
@@ -34,7 +41,7 @@ jobs:
       run: docker-compose logs
 
     - name: Run tests
-      run: docker-compose exec app lein test
+      run: docker-compose exec app sh -c "lein test"
 
     - name: Shut down Docker Compose services
       run: docker-compose down
