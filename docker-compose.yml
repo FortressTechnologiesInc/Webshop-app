@@ -4,6 +4,6 @@ services:
   app:
     build: .
     environment:
-      - DB_URL=${DB_URL}
+      - DB_URL="mongodb+srv://admin:<password>@kube.tbhktxa.mongodb.net/?retryWrites=true&w=majority&appName=kube "
     ports:
       - "8080:8080"
