@@ -4,17 +4,6 @@ services:
   app:
     build: .
     environment:
-      - DATABASE_URL=jdbc:postgresql://db:5432/clojure
-    depends_on:
-      - db
+      - DB_URL=${DB_URL}
     ports:
       - "8080:8080"
-
-  db:
-    image: postgres:12-alpine
-    environment:
-      POSTGRES_USER: clojure
-      POSTGRES_PASSWORD: clojure
-      POSTGRES_DB: clojure
-    ports:
-      - "5432:5432"
