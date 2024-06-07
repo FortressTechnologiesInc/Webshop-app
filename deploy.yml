@@ -1,0 +1,186 @@
+---
+# Jenkins PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+# Jenkins Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - name: jenkins
+        image: iscanprint/myjenkins:lts-jdk17-tools
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        volumeMounts:
+        - name: jenkins-volume
+          mountPath: /var/jenkins_home
+      volumes:
+      - name: jenkins-volume
+        persistentVolumeClaim:
+          claimName: jenkins-pvc
+---
+# Jenkins Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8080
+    nodePort: 30000
+  - port: 50000
+    targetPort: 50000
+  selector:
+    app: jenkins
+---
+# SonarQube PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonarqube-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+# SonarQube Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+    spec:
+      initContainers:
+      - name: init-sonarqube
+        image: ubuntu:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          apt-get update && apt-get upgrade -y
+          apt-get install -y openjdk-17-jdk
+      containers:
+      - name: sonarqube
+        image: sonarqube:lts-community
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: sonarqube-volume
+          mountPath: /opt/sonarqube/data
+      volumes:
+      - name: sonarqube-volume
+        persistentVolumeClaim:
+          claimName: sonarqube-pvc
+---
+# SonarQube Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube
+spec:
+  type: NodePort
+  ports:
+  - port: 9000
+    targetPort: 9000
+    nodePort: 30001
+  selector:
+    app: sonarqube
+---
+# Nexus PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+---
+# Nexus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      initContainers:
+      - name: init-nexus
+        image: ubuntu:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          apt-get update && apt-get upgrade -y
+          apt-get install -y openjdk-17-jdk
+      containers:
+      - name: nexus
+        image: sonatype/nexus3:latest
+        ports:
+        - containerPort: 8081
+        volumeMounts:
+        - name: nexus-volume
+          mountPath: /nexus-data
+      volumes:
+      - name: nexus-volume
+        persistentVolumeClaim:
+          claimName: nexus-pvc
+---
+# Nexus Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus
+spec:
+  type: NodePort
+  ports:
+  - port: 8081
+    targetPort: 8081
+    nodePort: 30002
+  selector:
+    app: nexus
