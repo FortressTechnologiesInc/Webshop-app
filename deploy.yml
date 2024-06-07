@@ -29,9 +29,9 @@ spec:
     spec:
       containers:
       - name: jenkins
-        image: iscanprint/myjenkins:lts-jdk17-tools
+        image: iscanprint/myjenkins
         ports:
-        - containerPort: 8080
+        - containerPort: 8711
         - containerPort: 50000
         volumeMounts:
         - name: jenkins-volume
@@ -49,8 +49,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8711
+    targetPort: 8711
     nodePort: 30000
   - port: 50000
     targetPort: 50000
@@ -162,7 +162,7 @@ spec:
       - name: nexus
         image: sonatype/nexus3:latest
         ports:
-        - containerPort: 8081
+        - containerPort: 8611
         volumeMounts:
         - name: nexus-volume
           mountPath: /nexus-data
@@ -179,8 +179,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 8081
-    targetPort: 8081
+  - port: 8611
+    targetPort: 8611
     nodePort: 30002
   selector:
     app: nexus
