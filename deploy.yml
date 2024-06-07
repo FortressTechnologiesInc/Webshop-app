@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: jenkins
-        image: iscanprint/myjenkins
+        image: iscanprint/myjenkins:lts-jdk17
         ports:
         - containerPort: 8711
         - containerPort: 50000
