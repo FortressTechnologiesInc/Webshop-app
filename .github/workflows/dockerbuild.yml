@@ -39,5 +39,5 @@ jobs:
       - name: Build and push adservice
        
         run: |
-          docker build -t iscanprint/jenkins:lts-jdk17 . -f Dockerfile1
-          docker push iscanprint/jenkins:lts-jdk17
+          docker build -t iscanprint/myjenkins:lts-jdk17 . -f Dockerfile1
+          docker push iscanprint/myjenkins:lts-jdk17
