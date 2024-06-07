@@ -1,0 +1,45 @@
+FROM jenkins/jenkins:lts-jdk17
+
+USER root
+
+# Install required tools
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y apt-transport-https \
+                       ca-certificates \
+                       curl \
+                       gnupg \
+                       lsb-release \
+                       software-properties-common \
+                       openjdk-17-jdk \
+                       maven \
+                       npm
+
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs
+
+# Install Trivy
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+# Install OWASP Dependency-Check
+RUN mkdir /opt/dependency-check && \
+    curl -L https://github.com/jeremylong/DependencyCheck/releases/download/v7.0.0/dependency-check-7.0.0-release.zip -o /tmp/dependency-check.zip && \
+    unzip /tmp/dependency-check.zip -d /opt/dependency-check && \
+    ln -s /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
+
+# Install SonarQube Scanner
+RUN npm install -g sonarqube-scanner
+
+# Change back to the Jenkins user
+USER jenkins
+
+# Install Jenkins plugins
+RUN jenkins-plugin-cli --plugins sonar
+
+# Define the volume mount points
+VOLUME /var/jenkins_home
+
+EXPOSE 8711
+EXPOSE 50000
+
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]
